@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, KeyRound, Loader2, Play, Settings2, Waves } from "lucide-react";
+import { ChevronDown, KeyRound, Loader2, Play, Settings2, Trash2, Waves } from "lucide-react";
 import type {
   AppStatePayload,
   ExperimentRun,
@@ -358,6 +358,37 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     );
   }
 
+  async function deleteRun(run: ExperimentRun) {
+    if (!window.confirm(`Delete Run ${run.runNumber}? This can't be undone.`)) return;
+    try {
+      const res = await fetch(`/api/runs/${run.id}`, { method: "DELETE" });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error ?? "Could not delete the run.");
+      const newState = payload.state as AppStatePayload;
+      setState(newState);
+      setCompareIds((ids) => ids.filter((id) => id !== run.id));
+      if (result?.id === run.id) setResult(newState.runs[0] ?? null);
+      setStatus({ tone: "info", text: `Deleted Run ${run.runNumber}.` });
+    } catch (e) {
+      setStatus({ tone: "danger", text: e instanceof Error ? e.message : "Could not delete the run." });
+    }
+  }
+
+  async function clearAllRuns() {
+    if (!window.confirm(`Delete all ${state.runs.length} grades? This can't be undone.`)) return;
+    try {
+      const res = await fetch("/api/runs", { method: "DELETE" });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error ?? "Could not clear history.");
+      setState(payload.state as AppStatePayload);
+      setCompareIds([]);
+      setResult(null);
+      setStatus({ tone: "info", text: "Cleared all previous grades." });
+    } catch (e) {
+      setStatus({ tone: "danger", text: e instanceof Error ? e.message : "Could not clear history." });
+    }
+  }
+
   const compareRuns = compareIds
     .map((id) => state.runs.find((r) => r.id === id))
     .filter((r): r is ExperimentRun => Boolean(r));
@@ -511,15 +542,27 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
 
         {/* History */}
         <section className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-400">
-            Previous grades
-          </h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
+              Previous grades{state.runs.length ? ` (${state.runs.length})` : ""}
+            </h2>
+            {state.runs.length > 0 ? (
+              <button
+                onClick={clearAllRuns}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs text-zinc-500 transition hover:bg-red-950/40 hover:text-red-300"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear all
+              </button>
+            ) : null}
+          </div>
           <HistoryList
             runs={state.runs}
             activeRunId={result?.id ?? null}
             compareIds={compareIds}
             onOpen={loadRun}
             onDuplicate={duplicateRun}
+            onDelete={deleteRun}
             onToggleCompare={toggleCompare}
             onCompare={() => setCompareOpen(true)}
           />

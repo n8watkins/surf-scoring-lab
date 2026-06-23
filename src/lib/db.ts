@@ -414,6 +414,20 @@ export function updateRunOutcomeNote(id: string, outcomeNote: string | null): Ex
   return getRun(id);
 }
 
+/** Delete a single run. Returns false if it does not exist. */
+export function deleteRun(id: string): boolean {
+  const exists = getDb().prepare("SELECT id FROM experiment_runs WHERE id = ?").get(id);
+  if (!exists) return false;
+  getDb().prepare("DELETE FROM experiment_runs WHERE id = ?").run(id);
+  return true;
+}
+
+/** Delete every run. Returns how many were removed. */
+export function deleteAllRuns(): number {
+  const info = getDb().prepare("DELETE FROM experiment_runs").run();
+  return Number(info.changes ?? 0);
+}
+
 // ---------------------------------------------------------------------------
 // Aggregate state
 // ---------------------------------------------------------------------------

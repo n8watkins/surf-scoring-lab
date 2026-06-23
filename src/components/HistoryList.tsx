@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, GitCompareArrows, Star } from "lucide-react";
+import { Copy, GitCompareArrows, Star, Trash2 } from "lucide-react";
 import type { ExperimentRun } from "@/lib/types";
 import { Button, EmptyState } from "@/components/ui";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
@@ -14,6 +14,7 @@ type Props = {
   compareIds: string[];
   onOpen: (run: ExperimentRun) => void;
   onDuplicate: (run: ExperimentRun) => void;
+  onDelete: (run: ExperimentRun) => void;
   onToggleCompare: (id: string) => void;
   onCompare: () => void;
 };
@@ -74,13 +75,22 @@ export function HistoryList(props: Props) {
                   </div>
                 </button>
                 <div className="flex flex-col items-end gap-2">
-                  <button
-                    onClick={() => props.onDuplicate(run)}
-                    title="Duplicate into the editors"
-                    className="rounded-md p-1 text-zinc-500 hover:text-zinc-200"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => props.onDuplicate(run)}
+                      title="Duplicate into the editors"
+                      className="rounded-md p-1 text-zinc-500 hover:text-zinc-200"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => props.onDelete(run)}
+                      title="Delete this grade"
+                      className="rounded-md p-1 text-zinc-500 hover:text-red-400"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                   <label
                     className="flex items-center gap-1 text-[11px] text-zinc-500"
                     title="Select to compare"

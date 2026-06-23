@@ -59,8 +59,7 @@ The whole point is comparing prompts/rubrics/outputs. These sharpen that loop.
 
 ## 4. Data & robustness
 
-- 🟢 **Delete a run** from history (today you can delete videos and save
-  versions, but runs only accumulate).
+- ✅ ~~**Delete a run** from history~~ — shipped (per-row trash + "Clear all").
 - 🟢 **Export** a run — or all history — as JSON; **CSV export** of the history
   table (run #, score, status, latency, prompt name, notes) for spreadsheets.
 - 🟡 **Video thumbnails** in the library — capture a frame client-side on upload

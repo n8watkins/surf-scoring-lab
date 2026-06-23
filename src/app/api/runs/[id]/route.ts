@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getAppState, updateRunOutcomeNote } from "@/lib/db";
+import { deleteRun, getAppState, updateRunOutcomeNote } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -23,4 +23,13 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 
   return NextResponse.json({ run, state: getAppState() });
+}
+
+/** Delete a single run (grade) from history. */
+export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  if (!deleteRun(id)) {
+    return NextResponse.json({ error: "Run not found." }, { status: 404 });
+  }
+  return NextResponse.json({ state: getAppState() });
 }
