@@ -68,6 +68,13 @@ export function extractStringList(value: unknown, keys: string[]): string[] {
     .filter((item): item is string => Boolean(item && item.trim()));
 }
 
+/** Band a 0–10 score for color-coding: low (<4), mid (4–5.9), high (≥6). */
+export function scoreBand(score: number): "low" | "mid" | "high" {
+  if (score < 4) return "low";
+  if (score < 6) return "mid";
+  return "high";
+}
+
 export type GradeSummary = {
   score: number | null;
   gradable: boolean | null;

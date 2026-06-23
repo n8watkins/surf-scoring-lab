@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type Tone = "neutral" | "success" | "warn" | "danger" | "info";
@@ -26,8 +27,29 @@ const toneNotice: Record<Tone, string> = {
   info: "border-sky-900 bg-sky-950/40 text-sky-200",
 };
 
-export function Notice({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
-  return <div className={`rounded-lg border px-3 py-2 text-sm ${toneNotice[tone]}`}>{children}</div>;
+export function Notice({
+  tone = "neutral",
+  children,
+  onDismiss,
+}: {
+  tone?: Tone;
+  children: ReactNode;
+  onDismiss?: () => void;
+}) {
+  return (
+    <div className={`relative rounded-lg border px-3 py-2 text-sm ${toneNotice[tone]} ${onDismiss ? "pr-9" : ""}`}>
+      {children}
+      {onDismiss ? (
+        <button
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          className="absolute right-1.5 top-1.5 rounded p-1 opacity-60 transition hover:opacity-100"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
+    </div>
+  );
 }
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

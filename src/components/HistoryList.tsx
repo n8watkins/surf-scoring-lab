@@ -5,7 +5,7 @@ import type { ExperimentRun } from "@/lib/types";
 import { Button, EmptyState } from "@/components/ui";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
 import { Time } from "@/components/Time";
-import { summarizeGrade } from "@/lib/grade";
+import { scoreBand, summarizeGrade } from "@/lib/grade";
 import { formatLatency } from "@/lib/format";
 
 type Props = {
@@ -113,12 +113,19 @@ export function HistoryList(props: Props) {
   );
 }
 
+const SCORE_CHIP: Record<"low" | "mid" | "high", { box: string; star: string; num: string }> = {
+  low: { box: "border-red-800/50 bg-red-500/10", star: "text-red-300", num: "text-red-200" },
+  mid: { box: "border-amber-800/50 bg-amber-500/10", star: "text-amber-300", num: "text-amber-200" },
+  high: { box: "border-teal-700/50 bg-teal-500/10", star: "text-teal-300", num: "text-teal-200" },
+};
+
 function ScoreChip({ score, gradable }: { score: number | null; gradable: boolean | null }) {
   if (score !== null) {
+    const c = SCORE_CHIP[scoreBand(score)];
     return (
-      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg border border-teal-700/50 bg-teal-500/10">
-        <Star className="h-3 w-3 text-teal-300" />
-        <span className="text-sm font-semibold tabular-nums text-teal-200">{score}</span>
+      <div className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg border ${c.box}`}>
+        <Star className={`h-3 w-3 ${c.star}`} />
+        <span className={`text-sm font-semibold tabular-nums ${c.num}`}>{score}</span>
       </div>
     );
   }

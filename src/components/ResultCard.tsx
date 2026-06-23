@@ -1,14 +1,21 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ClipboardCheck, Loader2, NotebookPen } from "lucide-react";
+import { ClipboardCheck, Download, Loader2, NotebookPen } from "lucide-react";
 import type { AppStatePayload, ExperimentRun } from "@/lib/types";
 import { Badge, Button, Notice, inputClass } from "@/components/ui";
 import { GradeView } from "@/components/GradeView";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
 import { Time } from "@/components/Time";
-import { summarizeGrade } from "@/lib/grade";
+import { scoreBand, summarizeGrade } from "@/lib/grade";
+import { downloadFile } from "@/lib/export";
 import { formatLatency } from "@/lib/format";
+
+const SCORE_TEXT: Record<"low" | "mid" | "high", string> = {
+  low: "text-red-300",
+  mid: "text-amber-300",
+  high: "text-teal-300",
+};
 
 type Tab = "formatted" | "raw" | "request";
 
@@ -55,7 +62,9 @@ export function ResultCard({
         <div className="flex items-center gap-4">
           {grade.score !== null ? (
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-semibold tabular-nums text-teal-300">{grade.score}</span>
+              <span className={`text-4xl font-semibold tabular-nums ${SCORE_TEXT[scoreBand(grade.score)]}`}>
+                {grade.score}
+              </span>
               <span className="text-sm text-zinc-500">score</span>
             </div>
           ) : null}
@@ -74,26 +83,38 @@ export function ResultCard({
       {grade.summary ? <p className="text-sm leading-6 text-zinc-300">{grade.summary}</p> : null}
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-zinc-800">
-        {(
-          [
-            ["formatted", "Formatted"],
-            ["raw", "Raw response"],
-            ["request", "Request details"],
-          ] as [Tab, string][]
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm transition ${
-              tab === key
-                ? "border-teal-400 text-zinc-100"
-                : "border-transparent text-zinc-500 hover:text-zinc-300"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex items-center justify-between gap-2 border-b border-zinc-800">
+        <div className="flex gap-1">
+          {(
+            [
+              ["formatted", "Formatted"],
+              ["raw", "Raw response"],
+              ["request", "Request details"],
+            ] as [Tab, string][]
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`-mb-px border-b-2 px-3 py-2 text-sm transition ${
+                tab === key
+                  ? "border-teal-400 text-zinc-100"
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() =>
+            downloadFile(`run-${run.runNumber}.json`, JSON.stringify(run, null, 2), "application/json")
+          }
+          title="Download this grade as JSON"
+          className="mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export
+        </button>
       </div>
 
       {tab === "formatted" ? (

@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, KeyRound, Loader2, Play, Settings2, Trash2, Waves } from "lucide-react";
+import {
+  ChevronDown,
+  Download,
+  KeyRound,
+  Loader2,
+  Play,
+  Settings2,
+  Trash2,
+  Waves,
+} from "lucide-react";
+import type { ReactNode } from "react";
 import type {
   AppStatePayload,
   ExperimentRun,
@@ -18,6 +28,7 @@ import {
   starterPrompt,
 } from "@/lib/starters";
 import { formatSeconds } from "@/lib/format";
+import { downloadFile, runsToCsv } from "@/lib/export";
 import { Badge, Button, Notice, inputClass } from "@/components/ui";
 import { VideoPanel } from "@/components/VideoPanel";
 import { ExperimentSetup, type EditorField } from "@/components/ExperimentSetup";
@@ -83,6 +94,14 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => () => { if (localUrl) URL.revokeObjectURL(localUrl); }, [localUrl]);
+
+  // Auto-dismiss success/info messages; keep warnings/errors until dismissed.
+  useEffect(() => {
+    if (status && (status.tone === "success" || status.tone === "info")) {
+      const timer = setTimeout(() => setStatus(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   const jsonValidation = useMemo(() => {
     try {
@@ -363,6 +382,14 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     setStatus({ tone: "info", text: "Duplicated. Change one thing, then Analyze to create a new run." });
   }
 
+  function exportHistoryJson() {
+    downloadFile("surf-grades.json", JSON.stringify(state.runs, null, 2), "application/json");
+  }
+
+  function exportHistoryCsv() {
+    downloadFile("surf-grades.csv", runsToCsv(state.runs), "text/csv");
+  }
+
   function toggleCompare(id: string) {
     setCompareIds((ids) =>
       ids.includes(id) ? ids.filter((x) => x !== id) : ids.length < 2 ? [...ids, id] : [ids[1], id],
@@ -455,13 +482,36 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
         </header>
 
         {!state.key.configured ? (
-          <Notice tone="warn">
-            Add a Gemini API key to start analyzing. Click “Add API key” above — it’s stored locally and
-            used only on the server.
-          </Notice>
+          <section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6">
+            <h2 className="text-base font-semibold text-zinc-100">Welcome to Surf Scoring Lab 🌊</h2>
+            <p className="mt-1 text-sm text-zinc-400">
+              Grade short surf clips with Gemini and compare prompts, rubrics, and outputs. Three steps
+              to your first grade:
+            </p>
+            <ol className="mt-4 grid gap-3 sm:grid-cols-3">
+              <OnboardStep n={1} title="Add your API key">
+                Stored only on this machine, used server-side.
+                <div className="mt-2">
+                  <Button variant="primary" onClick={() => setKeyOpen(true)} icon={<KeyRound className="h-4 w-4" />}>
+                    Add API key
+                  </Button>
+                </div>
+              </OnboardStep>
+              <OnboardStep n={2} title="Upload a clip">
+                Drag in one MP4 (one ride, under 30s works best).
+              </OnboardStep>
+              <OnboardStep n={3} title="Analyze">
+                Click <span className="text-zinc-200">Analyze video</span> — Gemini is only called then.
+              </OnboardStep>
+            </ol>
+          </section>
         ) : null}
 
-        {status ? <Notice tone={status.tone}>{status.text}</Notice> : null}
+        {status ? (
+          <Notice tone={status.tone} onDismiss={() => setStatus(null)}>
+            {status.text}
+          </Notice>
+        ) : null}
 
         {/* Clip & run */}
         <section className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
@@ -574,9 +624,17 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
               Previous grades{state.runs.length ? ` (${state.runs.length})` : ""}
             </h2>
             {state.runs.length > 0 ? (
-              <Button variant="danger" onClick={clearAllRuns} icon={<Trash2 className="h-4 w-4" />}>
-                Clear all
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant="ghost" onClick={exportHistoryJson} icon={<Download className="h-4 w-4" />}>
+                  JSON
+                </Button>
+                <Button variant="ghost" onClick={exportHistoryCsv} icon={<Download className="h-4 w-4" />}>
+                  CSV
+                </Button>
+                <Button variant="danger" onClick={clearAllRuns} icon={<Trash2 className="h-4 w-4" />}>
+                  Clear all
+                </Button>
+              </div>
             ) : null}
           </div>
           <HistoryList
@@ -608,5 +666,19 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
         />
       ) : null}
     </main>
+  );
+}
+
+function OnboardStep({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+  return (
+    <li className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
+      <div className="flex items-center gap-2">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-teal-500/15 text-xs font-semibold text-teal-300">
+          {n}
+        </span>
+        <span className="text-sm font-medium text-zinc-100">{title}</span>
+      </div>
+      <div className="mt-2 text-xs leading-5 text-zinc-400">{children}</div>
+    </li>
   );
 }

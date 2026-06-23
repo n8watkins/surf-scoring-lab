@@ -60,8 +60,7 @@ The whole point is comparing prompts/rubrics/outputs. These sharpen that loop.
 ## 4. Data & robustness
 
 - ✅ ~~**Delete a run** from history~~ — shipped (per-row trash + "Clear all").
-- 🟢 **Export** a run — or all history — as JSON; **CSV export** of the history
-  table (run #, score, status, latency, prompt name, notes) for spreadsheets.
+- ✅ ~~**Export** a run / all history as JSON + **CSV export** of the history~~ — shipped.
 - 🟡 **Video thumbnails** in the library — capture a frame client-side on upload
   and store it, so "Your uploads" is visual.
 - 🟡 **Explicit schema versioning** — a `schema_version` table + ordered
