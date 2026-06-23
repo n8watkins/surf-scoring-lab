@@ -1,4 +1,7 @@
-export type OutputMode = "example" | "schema";
+// v0.1 supports the JSON-example approach only. The `mode` column is kept for
+// forward-compatibility (a future JSON-Schema mode), but "example" is the only
+// value the app currently produces or sends.
+export type OutputMode = "example";
 
 /**
  * Overall fate of an experiment run.
@@ -29,6 +32,9 @@ export type VideoRecord = {
   duration: number | null;
   createdAt: string;
 };
+
+/** Client-facing video: the server-only filesystem path is never sent. */
+export type PublicVideo = Omit<VideoRecord, "localPath">;
 
 export type VersionRecord = {
   id: string;
@@ -97,7 +103,7 @@ export type KeyStatus = {
 };
 
 export type AppStatePayload = {
-  videos: VideoRecord[];
+  videos: PublicVideo[];
   prompts: VersionRecord[];
   rubrics: VersionRecord[];
   outputFormats: OutputFormatVersionRecord[];

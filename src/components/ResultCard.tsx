@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ClipboardCheck, Loader2, NotebookPen } from "lucide-react";
 import type { AppStatePayload, ExperimentRun } from "@/lib/types";
 import { Badge, Button, Notice, inputClass } from "@/components/ui";
 import { GradeView } from "@/components/GradeView";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
+import { Time } from "@/components/Time";
 import { summarizeGrade } from "@/lib/grade";
-import { formatDate, formatLatency } from "@/lib/format";
+import { formatLatency } from "@/lib/format";
 
 type Tab = "formatted" | "raw" | "request";
 
@@ -66,7 +67,7 @@ export function ResultCard({
           </div>
         </div>
         <div className="text-xs text-zinc-500">
-          {formatDate(run.createdAt)} · {formatLatency(run.latencyMs)} · {run.model}
+          <Time value={run.createdAt} /> · {formatLatency(run.latencyMs)} · {run.model}
         </div>
       </div>
 
@@ -151,7 +152,7 @@ function RawBlock({ text }: { text: string | null | undefined }) {
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Detail({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
       <dt className="text-xs uppercase tracking-wide text-zinc-500">{label}</dt>
@@ -183,7 +184,7 @@ function RequestDetails({ run }: { run: ExperimentRun }) {
         <Detail label="Prompt" value={ver(run.promptName, run.promptVersionNumber)} />
         <Detail label="Rubric" value={ver(run.rubricName, run.rubricVersionNumber)} />
         <Detail label="Output" value={ver(run.outputFormatName, run.outputFormatVersionNumber)} />
-        <Detail label="Started" value={formatDate(run.createdAt)} />
+        <Detail label="Started" value={<Time value={run.createdAt} />} />
       </dl>
       {run.hypothesis ? <Snapshot label="Hypothesis" content={run.hypothesis} /> : null}
       {run.errorMessage ? (

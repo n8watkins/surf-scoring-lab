@@ -30,7 +30,7 @@ const analyzeSchema = z.object({
   rubricVersionId: z.string().nullable().optional(),
   rubricVersionNumber: z.number().int().nullable().optional(),
   outputFormatName: z.string().trim().min(1).max(120),
-  outputFormatMode: z.enum(["example", "schema"]),
+  outputFormatMode: z.literal("example"),
   outputFormat: z.string().min(1),
   outputFormatVersionId: z.string().nullable().optional(),
   outputFormatVersionNumber: z.number().int().nullable().optional(),
@@ -76,7 +76,6 @@ export async function POST(request: Request) {
     prompt: data.prompt,
     rubric: data.rubric,
     outputFormat: data.outputFormat,
-    outputFormatMode: data.outputFormatMode,
   });
 
   const ai = getGeminiClient(apiKey);
@@ -121,7 +120,13 @@ export async function POST(request: Request) {
       config: { responseMimeType: "application/json" },
     });
 
-    rawResponse = response.text ?? "";
+    // Accessing `.text` can throw if the response was blocked (e.g. safety).
+    // Treat that as a response problem, not an API error — a run still saves.
+    try {
+      rawResponse = response.text ?? "";
+    } catch {
+      rawResponse = "";
+    }
     const result = parseModelResponse(rawResponse);
     parseStatus = result.parseStatus;
 

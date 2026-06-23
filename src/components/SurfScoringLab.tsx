@@ -6,8 +6,8 @@ import type {
   AppStatePayload,
   ExperimentRun,
   KeyStatus,
+  PublicVideo,
   VersionRecord,
-  VideoRecord,
 } from "@/lib/types";
 import {
   LOCKED_MODEL,
@@ -47,7 +47,7 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
   // ---- Video selection ----
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [localUrl, setLocalUrl] = useState<string | null>(null);
-  const [currentVideo, setCurrentVideo] = useState<VideoRecord | null>(initialState.videos[0] ?? null);
+  const [currentVideo, setCurrentVideo] = useState<PublicVideo | null>(initialState.videos[0] ?? null);
   const [duration, setDuration] = useState<number | null>(initialState.videos[0]?.duration ?? null);
   const [fileError, setFileError] = useState<string | null>(null);
 
@@ -140,7 +140,7 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     setFileError(null);
   }
 
-  function pickLibraryVideo(video: VideoRecord) {
+  function pickLibraryVideo(video: PublicVideo) {
     if (localUrl) URL.revokeObjectURL(localUrl);
     setLocalUrl(null);
     setSelectedFile(null);
@@ -149,7 +149,7 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     setFileError(null);
   }
 
-  async function deleteLibraryVideo(video: VideoRecord) {
+  async function deleteLibraryVideo(video: PublicVideo) {
     try {
       const res = await fetch(`/api/videos/${video.id}`, { method: "DELETE" });
       const payload = await res.json();
@@ -240,7 +240,7 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     return { id: null, number: null };
   }
 
-  async function ensureUploadedVideo(): Promise<VideoRecord> {
+  async function ensureUploadedVideo(): Promise<PublicVideo> {
     if (!selectedFile) {
       if (!currentVideo) throw new Error("Select an MP4 before analyzing.");
       return currentVideo;
@@ -251,7 +251,7 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     const res = await fetch("/api/upload", { method: "POST", body: form });
     const payload = await res.json();
     if (!res.ok) throw new Error(payload.error ?? "Video upload failed.");
-    const video = payload.video as VideoRecord;
+    const video = payload.video as PublicVideo;
     setState((cur) => ({ ...cur, videos: [video, ...cur.videos.filter((v) => v.id !== video.id)] }));
     if (localUrl) URL.revokeObjectURL(localUrl);
     setLocalUrl(null);
@@ -342,6 +342,10 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     setOutput({ name: `${run.outputFormatName} copy`, content: run.outputFormatSnapshot, versionId: null });
     setHypothesis(run.hypothesis ?? "");
     const video = state.videos.find((v) => v.id === run.videoId) ?? null;
+    // Clear any pending local selection so the duplicate uses this run's video.
+    if (localUrl) URL.revokeObjectURL(localUrl);
+    setLocalUrl(null);
+    setSelectedFile(null);
     setCurrentVideo(video);
     setDuration(video?.duration ?? null);
     setSetupOpen(true);

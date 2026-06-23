@@ -15,7 +15,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 and click **Add API key** in the header to paste a
+Open http://localhost:3333 and click **Add API key** in the header to paste a
 Gemini API key. The key is stored locally (in the SQLite database), used only on
 the server, and never sent to the browser or shown again after saving.
 

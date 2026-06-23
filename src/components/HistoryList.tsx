@@ -4,8 +4,9 @@ import { Copy, GitCompareArrows, Star } from "lucide-react";
 import type { ExperimentRun } from "@/lib/types";
 import { Button, EmptyState } from "@/components/ui";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
+import { Time } from "@/components/Time";
 import { summarizeGrade } from "@/lib/grade";
-import { formatDate, formatLatency } from "@/lib/format";
+import { formatLatency } from "@/lib/format";
 
 type Props = {
   runs: ExperimentRun[];
@@ -68,7 +69,7 @@ export function HistoryList(props: Props) {
                       <div className="mt-1 line-clamp-2 text-xs italic text-zinc-400">“{run.outcomeNote}”</div>
                     ) : null}
                     <div className="mt-1 text-[11px] text-zinc-600">
-                      {formatDate(run.createdAt)} · {formatLatency(run.latencyMs)}
+                      <Time value={run.createdAt} /> · {formatLatency(run.latencyMs)}
                     </div>
                   </div>
                 </button>

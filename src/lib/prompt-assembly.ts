@@ -1,10 +1,7 @@
-import type { OutputMode } from "@/lib/types";
-
 export type AssemblyInput = {
   prompt: string;
   rubric: string;
   outputFormat: string;
-  outputFormatMode: OutputMode;
 };
 
 /**
@@ -15,9 +12,7 @@ export type AssemblyInput = {
  */
 export function buildInstruction(input: AssemblyInput): string {
   const formatLabel =
-    input.outputFormatMode === "schema"
-      ? "Return JSON that follows this JSON Schema."
-      : "Return JSON shaped like this example. Preserve the intended field names and overall structure.";
+    "Return JSON shaped like this example. Preserve the intended field names and overall structure.";
 
   return `${input.prompt.trim()}
 

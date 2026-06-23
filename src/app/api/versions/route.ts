@@ -25,7 +25,7 @@ const bodySchema = z.discriminatedUnion("type", [
     type: z.literal("output"),
     name: z.string().trim().min(1).max(120),
     content: z.string().min(1),
-    mode: z.enum(["example", "schema"]).default("example"),
+    mode: z.literal("example").default("example"),
   }),
 ]);
 

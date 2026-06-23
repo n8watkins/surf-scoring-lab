@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
-import { insertVideo } from "@/lib/db";
+import { insertVideo, toPublicVideo } from "@/lib/db";
 import { MAX_VIDEO_BYTES } from "@/lib/starters";
 
 export const runtime = "nodejs";
@@ -50,5 +50,5 @@ export async function POST(request: Request) {
     duration,
   });
 
-  return NextResponse.json({ video });
+  return NextResponse.json({ video: toPublicVideo(video) });
 }

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Film, Trash2, Upload, X } from "lucide-react";
-import type { VideoRecord } from "@/lib/types";
+import type { PublicVideo } from "@/lib/types";
 import { Notice } from "@/components/ui";
 import { formatBytes, formatSeconds } from "@/lib/format";
 
@@ -15,12 +15,12 @@ type Props = {
   hasVideo: boolean;
   fileError: string | null;
   durationWarning: string | null;
-  library: VideoRecord[];
+  library: PublicVideo[];
   currentVideoId: string | null;
   onFile: (file: File | null) => void;
   onRemove: () => void;
-  onPick: (video: VideoRecord) => void;
-  onDelete: (video: VideoRecord) => void;
+  onPick: (video: PublicVideo) => void;
+  onDelete: (video: PublicVideo) => void;
   onDuration: (duration: number) => void;
 };
 

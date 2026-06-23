@@ -8,6 +8,7 @@ import type {
   OutputFormatVersionRecord,
   OutputMode,
   ParseStatus,
+  PublicVideo,
   RunStatus,
   VersionRecord,
   VideoRecord,
@@ -289,6 +290,13 @@ export function getVideo(id: string): VideoRecord | null {
   return rowToVideo(row);
 }
 
+/** Strip the server-only filesystem path before sending a video to the client. */
+export function toPublicVideo(video: VideoRecord): PublicVideo {
+  const { localPath: _localPath, ...rest } = video;
+  void _localPath;
+  return rest;
+}
+
 /** A video can only be deleted when no run references it. Returns false if in use. */
 export function deleteVideo(id: string): boolean {
   const inUse = asNumber(
@@ -414,7 +422,11 @@ export function getAppState(): AppStatePayload {
   const database = getDb();
 
   return {
-    videos: database.prepare("SELECT * FROM videos ORDER BY createdAt DESC").all().map(rowToVideo),
+    videos: database
+      .prepare("SELECT * FROM videos ORDER BY createdAt DESC")
+      .all()
+      .map(rowToVideo)
+      .map(toPublicVideo),
     prompts: database
       .prepare("SELECT * FROM prompt_versions ORDER BY name ASC, version DESC")
       .all()
@@ -469,12 +481,13 @@ function rowToVersion(row: Row): VersionRecord {
 function rowToOutputFormatVersion(row: Row): OutputFormatVersionRecord {
   return {
     ...rowToVersion(row),
-    mode: asMode(row.mode),
+    mode: asMode(),
   };
 }
 
-function asMode(value: unknown): OutputMode {
-  return value === "schema" ? "schema" : "example";
+function asMode(): OutputMode {
+  // Only "example" is supported in v0.1; any stored value normalizes to it.
+  return "example";
 }
 
 function asRunStatus(value: unknown): RunStatus {
@@ -522,7 +535,7 @@ function rowToRun(row: Row): ExperimentRun {
     outputFormatVersionId: asNullableString(row.outputFormatVersionId),
     outputFormatVersionNumber: asNullableNumber(row.outputFormatVersionNumber),
     outputFormatName: asString(row.outputFormatName),
-    outputFormatMode: asMode(row.outputFormatMode),
+    outputFormatMode: asMode(),
     outputFormatSnapshot: asString(row.outputFormatSnapshot),
 
     assembledRequest: asString(row.assembledRequest),
