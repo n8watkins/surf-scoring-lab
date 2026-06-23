@@ -57,6 +57,13 @@ export function ExperimentSetup(props: Props) {
 
   return (
     <div className="space-y-4">
+      <p className="text-xs leading-5 text-zinc-500">
+        Three separate ingredients are sent with the video — your{" "}
+        <span className="text-zinc-300">Prompt</span> (instructions),{" "}
+        <span className="text-zinc-300">Rubric</span> (grading criteria), and{" "}
+        <span className="text-zinc-300">Output JSON</span> (the shape you want back). Edit any tab below;
+        save it as a version to reuse, or just analyze with unsaved edits.
+      </p>
       <div className="flex flex-wrap items-center gap-2">
         {TABS.map((t) => (
           <button

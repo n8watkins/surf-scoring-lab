@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   ChevronDown,
   Download,
+  HelpCircle,
   KeyRound,
   Loader2,
   Play,
@@ -120,13 +122,19 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
       ? `This clip is ${formatSeconds(duration)}. Shorter clips (under 30s) tend to give clearer first results.`
       : null;
 
-  const analyzeDisabled =
-    isAnalyzing ||
-    !hasVideo ||
-    !jsonValidation.ok ||
-    videoSize > MAX_VIDEO_BYTES ||
-    Boolean(fileError) ||
-    !state.key.configured;
+  const analyzeReason = !state.key.configured
+    ? "Add your Gemini API key first (top right)."
+    : !hasVideo
+      ? "Upload or pick a clip first."
+      : videoSize > MAX_VIDEO_BYTES
+        ? "This clip is over the 50 MB limit."
+        : fileError
+          ? fileError
+          : !jsonValidation.ok
+            ? "Fix the Output JSON in Experiment setup."
+            : null;
+
+  const analyzeDisabled = isAnalyzing || analyzeReason !== null;
 
   // ---- Video handlers ----
   function setLocalVideo(file: File) {
@@ -466,6 +474,13 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/help"
+              className="inline-flex items-center gap-1.5 rounded-full border border-zinc-700 px-2.5 py-1 text-xs text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              How it works
+            </Link>
             <Badge tone="neutral">{LOCKED_MODEL}</Badge>
             <button
               onClick={() => setKeyOpen(true)}
@@ -547,15 +562,27 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
                 />
               </label>
 
-              <Button
-                variant="secondary"
+              <button
+                type="button"
                 onClick={() => setSetupOpen((v) => !v)}
-                icon={<Settings2 className="h-4 w-4" />}
-                className="justify-between"
+                aria-expanded={setupOpen}
+                className="flex w-full items-center justify-between gap-3 rounded-lg border border-zinc-700 bg-zinc-900/40 px-3.5 py-2.5 text-left transition hover:border-zinc-500"
               >
-                <span>Experiment setup</span>
-                <ChevronDown className={`h-4 w-4 transition ${setupOpen ? "rotate-180" : ""}`} />
-              </Button>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-sm font-medium text-zinc-100">
+                    <Settings2 className="h-4 w-4 text-teal-300" />
+                    Experiment setup
+                  </div>
+                  <div className="mt-0.5 truncate text-xs text-zinc-500">
+                    {setupOpen
+                      ? "Edit the prompt, rubric & output JSON — click to hide"
+                      : `Prompt: ${prompt.name} · Rubric: ${rubric.name} · Output: ${output.name}`}
+                  </div>
+                </div>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-zinc-400 transition ${setupOpen ? "rotate-180" : ""}`}
+                />
+              </button>
 
               <Button
                 variant="primary"
@@ -566,8 +593,8 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
               >
                 {isAnalyzing ? "Analyzing…" : "Analyze video"}
               </Button>
-              <p className="text-center text-xs text-zinc-600">
-                Gemini is contacted only when you click Analyze.
+              <p className={`text-center text-xs ${analyzeReason ? "text-amber-400/80" : "text-zinc-600"}`}>
+                {analyzeReason ?? "Gemini is contacted only when you click Analyze."}
               </p>
             </div>
           </div>
