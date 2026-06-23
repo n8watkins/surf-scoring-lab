@@ -52,12 +52,38 @@ export async function deleteGeminiFile(ai: GoogleGenAI, name: string | undefined
   }
 }
 
-export function toPublicError(error: unknown) {
-  if (error instanceof Error) {
-    if (/api[_ ]?key/i.test(error.message)) {
-      return "Gemini rejected the API key. Open Settings and enter a valid key.";
+export function toPublicError(error: unknown): string {
+  if (!(error instanceof Error)) return "The Gemini request failed.";
+  const raw = error.message;
+
+  // The SDK often embeds a JSON error body in the message; extract the inner
+  // human message + numeric code so we can show something actionable.
+  let inner = raw;
+  let code: number | null = null;
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0]);
+      const e = parsed?.error ?? parsed;
+      if (typeof e?.message === "string") inner = e.message;
+      if (typeof e?.code === "number") code = e.code;
+    } catch {
+      // not JSON — keep the raw message
     }
-    return error.message;
   }
-  return "The Gemini request failed.";
+  if (code === null) {
+    const codeMatch = raw.match(/\b(4\d\d|5\d\d)\b/);
+    if (codeMatch) code = Number(codeMatch[1]);
+  }
+
+  if (code === 429 || /RESOURCE_EXHAUSTED|quota|credits?\b.*deplet/i.test(raw)) {
+    return `Gemini quota/credits exhausted (429). This is a billing limit on the API key's Google AI Studio project — not an app error. Add billing/credits in AI Studio, or paste a different key in Settings. (${inner})`;
+  }
+  if (code === 401 || code === 403 || /api[_ ]?key|PERMISSION_DENIED|UNAUTHENTICATED/i.test(raw)) {
+    return "Gemini rejected the API key (auth/permission). Open Settings and enter a valid key with access to this model.";
+  }
+  if (code === 404 || /NOT_FOUND|is not found|not supported/i.test(raw)) {
+    return `Gemini could not use the requested model (404). Check the model id in src/lib/starters.ts. (${inner})`;
+  }
+  return inner || "The Gemini request failed.";
 }
