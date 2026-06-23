@@ -31,7 +31,7 @@ export function Notice({ tone = "neutral", children }: { tone?: Tone; children: 
 }
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
   icon?: ReactNode;
 };
 
@@ -41,6 +41,8 @@ const variants = {
   secondary:
     "border border-zinc-700 text-zinc-200 hover:border-zinc-500 hover:bg-zinc-900 disabled:opacity-50",
   ghost: "text-zinc-300 hover:bg-zinc-900 disabled:opacity-50",
+  danger:
+    "border border-red-900/70 bg-red-950/40 text-red-300 hover:border-red-700 hover:bg-red-900/50 hover:text-red-200 disabled:opacity-50",
 };
 
 export function Button({ variant = "secondary", icon, children, className = "", ...rest }: ButtonProps) {

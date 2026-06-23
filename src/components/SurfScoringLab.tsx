@@ -25,6 +25,7 @@ import { ResultCard } from "@/components/ResultCard";
 import { HistoryList } from "@/components/HistoryList";
 import { ComparisonDialog } from "@/components/ComparisonDialog";
 import { ApiKeyDialog } from "@/components/ApiKeyDialog";
+import { ConfirmDialog, type ConfirmState } from "@/components/ConfirmDialog";
 
 type StatusMessage = { tone: "info" | "success" | "danger" | "warn"; text: string } | null;
 type EditorType = "prompt" | "rubric" | "output";
@@ -78,6 +79,7 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     output: false,
   });
   const [status, setStatus] = useState<StatusMessage>(null);
+  const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => () => { if (localUrl) URL.revokeObjectURL(localUrl); }, [localUrl]);
@@ -149,7 +151,16 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     setFileError(null);
   }
 
-  async function deleteLibraryVideo(video: PublicVideo) {
+  function deleteLibraryVideo(video: PublicVideo) {
+    setConfirm({
+      title: "Remove video",
+      message: `Remove “${video.name}” from your library? (A video used by a saved grade can't be removed.)`,
+      confirmLabel: "Remove video",
+      onConfirm: () => void doDeleteLibraryVideo(video),
+    });
+  }
+
+  async function doDeleteLibraryVideo(video: PublicVideo) {
     try {
       const res = await fetch(`/api/videos/${video.id}`, { method: "DELETE" });
       const payload = await res.json();
@@ -358,8 +369,16 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     );
   }
 
-  async function deleteRun(run: ExperimentRun) {
-    if (!window.confirm(`Delete Run ${run.runNumber}? This can't be undone.`)) return;
+  function deleteRun(run: ExperimentRun) {
+    setConfirm({
+      title: "Delete grade",
+      message: `Run ${run.runNumber} and its result will be permanently removed. The uploaded video stays in your library.`,
+      confirmLabel: "Delete grade",
+      onConfirm: () => void doDeleteRun(run),
+    });
+  }
+
+  async function doDeleteRun(run: ExperimentRun) {
     try {
       const res = await fetch(`/api/runs/${run.id}`, { method: "DELETE" });
       const payload = await res.json();
@@ -374,8 +393,16 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
     }
   }
 
-  async function clearAllRuns() {
-    if (!window.confirm(`Delete all ${state.runs.length} grades? This can't be undone.`)) return;
+  function clearAllRuns() {
+    setConfirm({
+      title: "Clear all grades",
+      message: `All ${state.runs.length} grades will be permanently removed. Your uploaded videos stay in the library.`,
+      confirmLabel: "Clear all",
+      onConfirm: () => void doClearAllRuns(),
+    });
+  }
+
+  async function doClearAllRuns() {
     try {
       const res = await fetch("/api/runs", { method: "DELETE" });
       const payload = await res.json();
@@ -547,13 +574,9 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
               Previous grades{state.runs.length ? ` (${state.runs.length})` : ""}
             </h2>
             {state.runs.length > 0 ? (
-              <button
-                onClick={clearAllRuns}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs text-zinc-500 transition hover:bg-red-950/40 hover:text-red-300"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
+              <Button variant="danger" onClick={clearAllRuns} icon={<Trash2 className="h-4 w-4" />}>
                 Clear all
-              </button>
+              </Button>
             ) : null}
           </div>
           <HistoryList
@@ -575,6 +598,8 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
         onClose={() => setKeyOpen(false)}
         onApplied={onKeyApplied}
       />
+
+      <ConfirmDialog state={confirm} onClose={() => setConfirm(null)} />
 
       {compareOpen && compareRuns.length === 2 ? (
         <ComparisonDialog
