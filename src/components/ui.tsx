@@ -59,7 +59,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variants = {
   primary:
-    "bg-teal-400 text-zinc-950 font-semibold hover:bg-teal-300 disabled:bg-teal-400/40 disabled:text-zinc-950/60",
+    "bg-teal-400 text-zinc-950 font-semibold hover:bg-teal-300 disabled:bg-zinc-800 disabled:text-zinc-500",
   secondary:
     "border border-zinc-700 text-zinc-200 hover:border-zinc-500 hover:bg-zinc-900 disabled:opacity-50",
   ghost: "text-zinc-300 hover:bg-zinc-900 disabled:opacity-50",

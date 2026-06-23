@@ -149,7 +149,13 @@ export function ExperimentSetup(props: Props) {
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-800 pt-3">
         <div className="flex flex-wrap gap-2">
           {tab === "output" ? (
-            <Button variant="ghost" onClick={props.onFormatJson} disabled={!props.jsonValid} icon={<Braces className="h-4 w-4" />}>
+            <Button
+              variant="ghost"
+              onClick={props.onFormatJson}
+              disabled={!props.jsonValid}
+              title={props.jsonValid ? undefined : "Fix the JSON before formatting"}
+              icon={<Braces className="h-4 w-4" />}
+            >
               Format
             </Button>
           ) : null}
@@ -167,6 +173,7 @@ export function ExperimentSetup(props: Props) {
           variant="secondary"
           onClick={() => props.onSaveVersion(tab)}
           disabled={props.saving[tab] || (tab === "output" && !props.jsonValid)}
+          title={tab === "output" && !props.jsonValid ? "Fix the JSON before saving" : undefined}
           icon={props.saving[tab] ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
         >
           Save new {tab} version

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { KeyRound, Loader2, X } from "lucide-react";
 import type { KeyStatus } from "@/lib/types";
 import { Button, Notice, inputClass } from "@/components/ui";
+import { Modal } from "@/components/Modal";
 
 export function ApiKeyDialog({
   open,
@@ -59,23 +60,24 @@ export function ApiKeyDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-      onClick={onClose}
+    <Modal
+      onClose={onClose}
+      labelledBy="apikey-title"
+      className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
     >
-      <div
-        className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-base font-semibold text-zinc-100">
-            <KeyRound className="h-4 w-4 text-teal-300" />
-            Gemini API key
-          </h2>
-          <button onClick={onClose} className="rounded-md p-1 text-zinc-500 hover:text-zinc-200">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 id="apikey-title" className="flex items-center gap-2 text-base font-semibold text-zinc-100">
+          <KeyRound className="h-4 w-4 text-teal-300" />
+          Gemini API key
+        </h2>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="rounded-md p-1 text-zinc-500 hover:text-zinc-200"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
 
         <div className="space-y-3 text-sm text-zinc-400">
           <p>
@@ -129,7 +131,6 @@ export function ApiKeyDialog({
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

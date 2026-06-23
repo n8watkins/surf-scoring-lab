@@ -79,6 +79,7 @@ export function HistoryList(props: Props) {
                     <button
                       onClick={() => props.onDuplicate(run)}
                       title="Duplicate into the editors"
+                      aria-label={`Duplicate Run ${run.runNumber} into the editors`}
                       className="rounded-lg p-1.5 text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
                     >
                       <Copy className="h-4 w-4" />
@@ -86,6 +87,7 @@ export function HistoryList(props: Props) {
                     <button
                       onClick={() => props.onDelete(run)}
                       title="Delete this grade"
+                      aria-label={`Delete Run ${run.runNumber}`}
                       className="rounded-lg p-1.5 text-zinc-500 transition hover:bg-red-950/50 hover:text-red-300"
                     >
                       <Trash2 className="h-4 w-4" />

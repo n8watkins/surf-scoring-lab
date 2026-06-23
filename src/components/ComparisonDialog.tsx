@@ -3,33 +3,37 @@
 import { X } from "lucide-react";
 import type { ExperimentRun } from "@/lib/types";
 import { Badge } from "@/components/ui";
+import { Modal } from "@/components/Modal";
 import { RunStatusBadge } from "@/components/RunStatusBadge";
 import { summarizeGrade } from "@/lib/grade";
 import { formatLatency } from "@/lib/format";
 
 export function ComparisonDialog({ runs, onClose }: { runs: [ExperimentRun, ExperimentRun]; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
-      <div
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
-          <h2 className="text-base font-semibold text-zinc-100">
-            Compare Run {runs[0].runNumber} vs Run {runs[1].runNumber}
-          </h2>
-          <button onClick={onClose} className="rounded-md p-1 text-zinc-500 hover:text-zinc-200">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-px overflow-auto bg-zinc-800">
-          {runs.map((run) => (
-            <RunColumn key={run.id} run={run} />
-          ))}
-        </div>
+    <Modal
+      onClose={onClose}
+      labelledBy="compare-title"
+      className="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl"
+    >
+      <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
+        <h2 id="compare-title" className="text-base font-semibold text-zinc-100">
+          Compare Run {runs[0].runNumber} vs Run {runs[1].runNumber}
+        </h2>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="rounded-md p-1 text-zinc-500 hover:text-zinc-200"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
-    </div>
+
+      <div className="grid grid-cols-1 gap-px overflow-auto bg-zinc-800 sm:grid-cols-2">
+        {runs.map((run) => (
+          <RunColumn key={run.id} run={run} />
+        ))}
+      </div>
+    </Modal>
   );
 }
 

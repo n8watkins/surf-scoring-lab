@@ -110,6 +110,7 @@ export function ResultCard({
             downloadFile(`run-${run.runNumber}.json`, JSON.stringify(run, null, 2), "application/json")
           }
           title="Download this grade as JSON"
+          aria-label="Export this grade as JSON"
           className="mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-200"
         >
           <Download className="h-3.5 w-3.5" />
@@ -119,7 +120,7 @@ export function ResultCard({
 
       {tab === "formatted" ? (
         run.parseStatus === "valid_json" && run.parsedResponse !== null ? (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+          <div className="max-h-[560px] overflow-auto rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
             <GradeView value={run.parsedResponse} />
           </div>
         ) : (
@@ -155,6 +156,7 @@ export function ResultCard({
             variant="secondary"
             onClick={saveNote}
             disabled={!noteDirty || savingNote}
+            title={!noteDirty ? "No changes to save" : undefined}
             icon={savingNote ? <Loader2 className="h-4 w-4 animate-spin" /> : <ClipboardCheck className="h-4 w-4" />}
           >
             Save note

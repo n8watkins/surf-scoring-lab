@@ -31,7 +31,7 @@ import {
 } from "@/lib/starters";
 import { formatSeconds } from "@/lib/format";
 import { downloadFile, runsToCsv } from "@/lib/export";
-import { Badge, Button, Notice, inputClass } from "@/components/ui";
+import { Badge, Button, EmptyState, Notice, inputClass } from "@/components/ui";
 import { VideoPanel } from "@/components/VideoPanel";
 import { ExperimentSetup, type EditorField } from "@/components/ExperimentSetup";
 import { ResultCard } from "@/components/ResultCard";
@@ -97,13 +97,14 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
 
   useEffect(() => () => { if (localUrl) URL.revokeObjectURL(localUrl); }, [localUrl]);
 
-  // Auto-dismiss success/info messages; keep warnings/errors until dismissed.
+  // Auto-dismiss success/info messages after a few seconds; keep warnings and
+  // errors until dismissed, and never hide a message while a run is in flight.
   useEffect(() => {
-    if (status && (status.tone === "success" || status.tone === "info")) {
+    if (!isAnalyzing && status && (status.tone === "success" || status.tone === "info")) {
       const timer = setTimeout(() => setStatus(null), 4000);
       return () => clearTimeout(timer);
     }
-  }, [status]);
+  }, [status, isAnalyzing]);
 
   const jsonValidation = useMemo(() => {
     try {
@@ -638,9 +639,7 @@ export function SurfScoringLab({ initialState }: { initialState: AppStatePayload
               }}
             />
           ) : (
-            <div className="flex min-h-44 items-center justify-center rounded-xl border border-dashed border-zinc-800 text-center text-sm text-zinc-500">
-              Upload a clip and click Analyze. The grade will appear here.
-            </div>
+            <EmptyState>Upload a clip and click Analyze. The grade will appear here.</EmptyState>
           )}
         </section>
 

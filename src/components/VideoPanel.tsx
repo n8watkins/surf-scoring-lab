@@ -54,12 +54,14 @@ export function VideoPanel(props: Props) {
             <div className="flex gap-2">
               <button
                 onClick={() => inputRef.current?.click()}
+                aria-label="Replace video"
                 className="rounded-lg border border-zinc-700 px-2.5 py-1.5 text-xs text-zinc-200 hover:border-zinc-500"
               >
                 Replace
               </button>
               <button
                 onClick={props.onRemove}
+                aria-label="Clear selected video"
                 className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-xs text-zinc-300 hover:border-red-700 hover:text-red-300"
               >
                 <X className="h-3.5 w-3.5" />
@@ -134,8 +136,9 @@ export function VideoPanel(props: Props) {
                   </button>
                   <button
                     onClick={() => props.onDelete(video)}
-                    className="text-zinc-600 opacity-0 transition group-hover:opacity-100 hover:text-red-400"
                     title="Remove from library"
+                    aria-label={`Remove ${video.name} from library`}
+                    className="text-zinc-500 opacity-60 transition hover:text-red-400 focus-visible:opacity-100 group-hover:opacity-100"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
